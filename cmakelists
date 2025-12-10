@@ -1,0 +1,74 @@
+cmake_minimum_required(VERSION 3.13)
+project(OpenVINO_SEG_Inference
+        VERSION 1.0.0
+        DESCRIPTION "YOLO OpenVINO SEG Inference Engine"
+        LANGUAGES CXX
+        )
+# 强制使用Release构建类型
+set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+# 仅在未指定构建类型时默认为 Release
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+endif()
+# 设置C++20标准
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+# 显式添加系统头文件路径（关键修复）
+include_directories(
+        SYSTEM
+       # /Library/Developer/CommandLineTools/usr/include/c++/v1  # libc++头文件
+        /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include  # 系统头文件
+        /usr/local/include  # Homebrew路径
+)
+
+# OpenVINO配置
+set(OpenVINO_DIR "/usr/local/Cellar/openvino/2025.3.0_4/lib/cmake/openvino2025.3.0")
+find_package(OpenVINO 2025.3 REQUIRED
+        COMPONENTS Runtime
+        PATHS ${OpenVINO_DIR}
+        NO_DEFAULT_PATH
+        )
+
+# OpenCV配置
+set(OpenCV_DIR "/usr/local/Cellar/opencv/4.12.0_15/lib/cmake/opencv4")
+find_package(OpenCV REQUIRED)
+
+# 验证包是否找到
+if(NOT OpenVINO_FOUND)
+    message(FATAL_ERROR "OpenVINO未找到，请检查安装路径：${OpenVINO_DIR}")
+endif()
+
+if(NOT OpenCV_FOUND)
+    message(FATAL_ERROR "OpenCV未找到，请检查安装路径：${OpenCV_DIR}")
+endif()
+
+# 包含项目头文件
+include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+# 添加可执行文件
+add_executable(openvino_seg_inference
+        src/main.cpp
+        src/yolo_openVino.cpp
+        src/base64.cpp
+        )
+
+# 链接库（使用target_link_libraries更精确）
+target_link_libraries(openvino_seg_inference
+        openvino::runtime
+        ${OpenCV_LIBS}
+        )
+
+# 设置输出目录
+set_target_properties(openvino_seg_inference PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        )
+
+# 打印配置信息
+message(STATUS "OpenVINO配置成功！")
+message(STATUS "OpenVINO版本: ${OpenVINO_VERSION}")
+message(STATUS "OpenCV版本: ${OpenCV_VERSION}")
+message(STATUS "构建类型: ${CMAKE_BUILD_TYPE}")
+message(STATUS "系统头文件路径 : ${CMAKE_CXX_IMPLICIT_INCLUDE_PATHS}")
