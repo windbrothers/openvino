@@ -1,0 +1,12 @@
+=== Loaded Config ===
+model_path=/Users/zhangyanfeng/Desktop/workspaces/models/A1.xml
+image_path=/Users/zhangyanfeng/Desktop/Timg/A1
+save_path=/Users/zhangyanfeng/Desktop/TSimg/A
+yolo_detect_styles=seg
+GPU_Style=CPU
+config_threshold=0.5
+nms_threshold= 0.45
+target_size= 1280
+yolo_model_Size=1280
+log_Path=/Users/zhangyanfeng/Desktop/logs.txt
+
