@@ -145,7 +145,6 @@ static void  drawDetection( cv::Mat& img,
     Rect text_box(box.tl().x, box.tl().y - 30, text_size.width + 10, text_size.height + 10);
     putText(img, label.str(), cv::Point(box.tl().x + 5, box.tl().y - 10),
             cv::FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
-    label;
 }
 std::string matToBase64(const Mat& image) {
     std::vector<uchar> buffer;
@@ -531,7 +530,12 @@ bool YoloModelImpl::YoloDetectInfer( Mat& src,  InitDataInfo& info) {
                   << class_ids[idx]<< " ,x=" << boxes[idx].x  << " ,y=" << boxes[idx].y
                   <<  " ,w=" << boxes[idx].width << " ,h=" << boxes[idx].height << std::endl;
 
+          cv::Rect roi(boxes[idx].x , boxes[idx].y, boxes[idx].width, boxes[idx].height );
 
+        // 根据ROI裁剪图像
+        cv::Mat croppedImg = src(roi);
+        info.updata_infos.Sub_Directory = "cut/"+std::to_string(class_ids[idx]);
+        saveimg(info, info.updata_infos.Real_RST_Name, croppedImg, tmp_K);
         const int color_idx = class_ids[idx] % Constants::CLASS_NAMES.size();
         drawDetection(result_img, boxes[idx], class_scores[idx], class_ids[idx], Constants::COLOR[color_idx] );
         writeDetectionLog(info.updata_infos.Save_Path,"", info.updata_infos.Real_RST_Name,class_ids[idx],
